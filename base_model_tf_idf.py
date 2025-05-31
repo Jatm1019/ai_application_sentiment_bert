@@ -30,15 +30,22 @@ X = tfid_obj.fit_transform(df["wakati"])
 print("ベクトル形状:", X.shape)
 print("特徴語:", tfid_obj.get_feature_names_out())
 
-y = df["Avg. Readers_Sentiment"]
+df_label = df[[ "Avg. Readers_Joy","Avg. Readers_Sadness","Avg. Readers_Anticipation","Avg. Readers_Surprise","Avg. Readers_Anger","Avg. Readers_Fear","Avg. Readers_Disgust","Avg. Readers_Trust"]].dropna()
+df["label"] = df_label.values.argmax(axis=1)
+df = df[["Sentence", "label"]]
 
+
+y = df["label"]
+print(df['label'].value_counts())
 # 学習用とテスト用に分割
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.1, random_state=42)
 
 model = LogisticRegression()
 model.fit(X_train,y_train)
 
 Y_pred = model.predict(X_test)
+print(X_test)
+print(Y_pred)
 
 # オッズ
 feature_names = tfid_obj.get_feature_names_out()
@@ -49,25 +56,7 @@ fig, axes = plt.subplots(nrows=num_classes, ncols=1, figsize=(10, 3 * num_classe
 if num_classes == 1:
     axes = [axes]
 
-# for i, coef in enumerate(model.coef_):
-#     odds_ratio = np.exp(coef)
-#     sorted_indices = np.argsort(odds_ratio)
-    
-#     top_indices = np.concatenate([sorted_indices[:num_top_words], sorted_indices[-num_top_words:]])
-#     top_features = feature_names[top_indices]
-#     top_odds = odds_ratio[top_indices]
 
-
-#     ax = axes[i]
-    
-#     sns.barplot(x=top_odds, y=top_features, ax=ax, palette="coolwarm")
-#     yticks = np.arange(len(top_features))
-#     ax.set_yticks(yticks)
-#     ax.set_yticklabels(top_features, fontsize=8)  # 小さめフォント
-#     ax.set_title(f"オッズ比（Class {model.classes_[i]}）")
-#     ax.set_xlabel("Odds Ratio")
-#     ax.set_ylabel("Feature")
-#     ax.tick_params(labelsize=10)
 jp_font = 'MS Gothic'
 for i in range(len(model.classes_)):
     coef = model.coef_[i]
